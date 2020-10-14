@@ -25,6 +25,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
 import android.provider.MediaStore
 import android.text.Editable
 import android.text.TextWatcher
@@ -39,6 +40,7 @@ import de.schildbach.wallet.Constants
 import de.schildbach.wallet.data.BlockchainIdentityData
 import de.schildbach.wallet.data.DashPayProfile
 import de.schildbach.wallet.livedata.Status
+import de.schildbach.wallet.ui.dashpay.CropImageActivity
 import de.schildbach.wallet.ui.dashpay.EditProfileViewModel
 import de.schildbach.wallet.ui.dashpay.SelectProfilePictureDialog
 import de.schildbach.wallet.ui.dashpay.SelectProfilePictureSharedViewModel
@@ -243,6 +245,10 @@ class EditProfileActivity : BaseMenuActivity() {
         startActivityForResult(takePicture, REQUEST_CODE_IMAGE)
     }
 
+    private fun startCropActivity() {
+        startActivity(Intent(this, CropImageActivity::class.java))
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode != RESULT_CANCELED) {
@@ -253,6 +259,7 @@ class EditProfileActivity : BaseMenuActivity() {
                     dashpayUserAvatar.setImageBitmap(selectedImage)
                     editProfileViewModel.saveBitmap(selectedImage)
                     // TODO: crop the image?
+                    startCropActivity()
                 }
                 REQUEST_CODE_URI -> if (resultCode == RESULT_OK && data != null) {
                     val selectedImage: Uri? = data.data
@@ -269,6 +276,7 @@ class EditProfileActivity : BaseMenuActivity() {
                             editProfileViewModel.localProfileImageUri = picturePath
                             cursor.close()
                             // TODO: crop the image?
+                            startCropActivity()
                         }
                     }
                 }
