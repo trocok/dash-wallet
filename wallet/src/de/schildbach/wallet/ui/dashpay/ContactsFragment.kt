@@ -30,6 +30,7 @@ import androidx.core.text.HtmlCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import de.schildbach.wallet.data.BlockchainState
 import de.schildbach.wallet.data.PaymentIntent
 import de.schildbach.wallet.data.UsernameSearchResult
 import de.schildbach.wallet.data.UsernameSortOrderBy
@@ -39,8 +40,12 @@ import de.schildbach.wallet.ui.*
 import de.schildbach.wallet.ui.send.SendCoinsInternalActivity
 import de.schildbach.wallet.util.KeyboardUtil
 import de.schildbach.wallet_test.R
+import kotlinx.android.synthetic.main.activity_search_dashpay_profile_root.*
 import kotlinx.android.synthetic.main.contacts_empty_state_layout.*
 import kotlinx.android.synthetic.main.contacts_list_layout.*
+import kotlinx.android.synthetic.main.contacts_list_layout.icon
+import kotlinx.android.synthetic.main.contacts_list_layout.network_error_container
+import kotlinx.android.synthetic.main.network_unavailable.*
 import org.bitcoinj.core.PrefixedChecksummedBytes
 import org.bitcoinj.core.Transaction
 import org.bitcoinj.core.VerificationException
@@ -128,6 +133,8 @@ class ContactsFragment : BottomNavFragment(R.layout.fragment_contacts_root), Tex
             onSearchUser()
         }
         searchContacts()
+
+        network_error_subtitle.setText(R.string.network_error_contact_suggestions)
     }
 
     private fun showEmptyPane() {
@@ -175,6 +182,16 @@ class ContactsFragment : BottomNavFragment(R.layout.fragment_contacts_root), Tex
                 }
             }
         })
+        dashPayViewModel.blockchainStateData.observe(viewLifecycleOwner, {
+            it?.apply {
+                val networkError = impediments.contains(BlockchainState.Impediment.NETWORK)
+                updateNetworkErrorVisibility(networkError)
+            }
+        })
+    }
+
+    private fun updateNetworkErrorVisibility(networkError: Boolean) {
+        network_error_container.visibility = if (networkError) View.VISIBLE else View.GONE
     }
 
     private fun showSuggestedUsers(users: List<UsernameSearchResult>?) {
